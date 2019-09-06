@@ -17,11 +17,12 @@ module SolidusAffirm
     end
 
     def item_image_url
-      if object.variant.images.any?
-        object.variant.images.first.attachment.url(:large)
-      elsif object.variant.product.images.any?
-        object.variant.product.images.first.attachment.url(:large)
-      end
+      'http://www.petsworld.in/blog/wp-content/uploads/2014/09/adorable-cat.jpg'
+      # if object.variant.images.any?
+      #   object.variant.images.first.attachment.url(:large)
+      # elsif object.variant.product.images.any?
+      #   object.variant.product.images.first.attachment.url(:large)
+      # end
     end
 
     def item_url
