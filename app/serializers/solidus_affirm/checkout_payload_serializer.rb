@@ -32,10 +32,10 @@ module SolidusAffirm
 
     def discounts
       promo_total = object.order.promo_total
-      if promo_total > 0
+    if promo_total != 0
         {
-          promotion_total: {
-            discount_amount: promo_total.to_money.cents,
+          "Total promotion discount" => {
+            discount_amount: promo_total.to_money.cents.abs,
             discount_display_name: "Total promotion discount"
           }
         }
