@@ -13,12 +13,15 @@ RSpec.describe SolidusAffirm::CheckoutPayloadSerializer do
   let(:billing_address) { create(:bill_address, firstname: "John", lastname: "Do", zipcode: "58451") }
 
   let(:order) do
-    create(:order_with_line_items,
+    create(:completed_order_with_promotion,
       line_items_count: 2,
       line_items_attributes: line_item_attributes,
       ship_address: shipping_address,
-      billing_address: billing_address)
+      billing_address: billing_address,
+      promotion: promotion
+    )
   end
+  let(:promotion) { create(:promotion, :with_order_adjustment)}
   let(:config) do
     {
       confirmation_url: "https://merchantsite.com/confirm",
@@ -134,21 +137,25 @@ RSpec.describe SolidusAffirm::CheckoutPayloadSerializer do
 
   describe 'discounts' do
     context 'on an order without any promotions' do
+      let(:order) do
+        create(:order_with_line_items,
+          line_items_count: 2,
+          line_items_attributes: line_item_attributes,
+          ship_address: shipping_address,
+          billing_address: billing_address,
+        )
+      end
       it "will not render a discounts key" do
         expect(subject['discounts']).to be_nil
       end
     end
 
     context 'on an order with promotions' do
-      before do
-        expect(order).to receive(:promo_total).and_return(BigDecimal("100.00"))
-      end
-
       it "will aggregate the promotions into the discounts key" do
         output = subject
-        expect(output['discounts']).to_not be_empty
-        expect(output['discounts']['promotion_total']['discount_amount']).to eql 10_000
-        expect(output['discounts']['promotion_total']['discount_display_name']).to eql "Total promotion discount"
+        expect(output['discounts']).to be_present
+        expect(output['discounts']['Promo']['discount_amount']).to eql 1000
+        expect(output['discounts']['Promo']['discount_display_name']).to eql "Promo"
       end
     end
   end

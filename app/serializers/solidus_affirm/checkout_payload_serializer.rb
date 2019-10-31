@@ -31,15 +31,67 @@ module SolidusAffirm
     end
 
     def discounts
-      promo_total = object.order.promo_total
-    if promo_total != 0
+      discounts = order_promotions.merge(line_item_promotions, &promo_merge)
+
+      discounts.empty? ? nil : discounts
+    end
+
+    def order_promotions
+      object.order.adjustments
+        .select(&promo_filter)
+        .to_h do |adjustment|
+          [
+            promo_name(adjustment),
+            {
+              discount_amount: promo_amount(adjustment),
+              discount_display_name: promo_name(adjustment),
+            }
+          ]
+        end
+    end
+
+    def line_item_promotions
+      line_item_promotions = []
+
+      object.order.line_items.each do |item|
+        item.adjustments
+          .select(&promo_filter)
+          .each do |adjustment|
+          line_item_promotions.push(
+            {
+              promo_name(adjustment) => {
+                discount_amount: promo_amount(adjustment),
+                discount_display_name: promo_name(adjustment),
+              }
+            }
+          )
+        end
+      end
+
+      line_item_promotions.reduce({}) do |promo_hash, promo|
+        promo_hash.merge(promo, &promo_merge)
+      end
+    end
+
+    def promo_filter
+      ->(adjustment) {adjustment.source_type == "Spree::PromotionAction" && adjustment.amount != 0}
+    end
+
+    def promo_merge
+      ->(key, p1, p2) do
         {
-          "Total promotion discount" => {
-            discount_amount: promo_total.to_money.cents.abs,
-            discount_display_name: "Total promotion discount"
-          }
+          discount_amount: p1[:discount_amount] + p2[:discount_amount],
+          discount_display_name: p1[:discount_display_name],
         }
       end
+    end
+
+    def promo_name(adjustment)
+      adjustment.promotion_code.promotion.name
+    end
+
+    def promo_amount(adjustment)
+      (adjustment.amount.to_money.cents) * -1
     end
 
     def order_id
