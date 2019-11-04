@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'factory_bot'
   s.add_development_dependency 'ffaker'
   s.add_development_dependency 'selenium-webdriver'
+  s.add_development_dependency 'rails', '< 6'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'rubocop', '>= 0.38'
   s.add_development_dependency 'rubocop-rspec', '1.4.0'
