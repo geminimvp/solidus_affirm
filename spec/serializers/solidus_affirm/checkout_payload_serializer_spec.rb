@@ -22,7 +22,7 @@ RSpec.describe SolidusAffirm::CheckoutPayloadSerializer do
     )
   end
   let(:promotion) { create(:promotion, :with_order_adjustment)}
-  let(:promo_code) { promotion.codes.first}
+  let(:promo_code) { promotion.codes.first.value }
   let(:config) do
     {
       confirmation_url: "https://merchantsite.com/confirm",
@@ -155,8 +155,8 @@ RSpec.describe SolidusAffirm::CheckoutPayloadSerializer do
       it "will aggregate the promotions into the discounts key" do
         output = subject
         expect(output['discounts']).to be_present
-        expect(output['discounts'][promo_code.value]['discount_amount']).to eql 1000
-        expect(output['discounts'][promo_code.value]['discount_display_name']).to eql "Promo"
+        expect(output['discounts'][promo_code]['discount_amount']).to eql 1000
+        expect(output['discounts'][promo_code]['discount_display_name']).to eql "Promo"
       end
     end
   end
