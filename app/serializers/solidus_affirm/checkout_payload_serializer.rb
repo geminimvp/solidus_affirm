@@ -41,7 +41,7 @@ module SolidusAffirm
         .select(&promo_filter)
         .to_h do |adjustment|
           [
-            promo_name(adjustment),
+            promo_code(adjustment),
             {
               discount_amount: promo_amount(adjustment),
               discount_display_name: promo_name(adjustment),
@@ -59,7 +59,7 @@ module SolidusAffirm
           .each do |adjustment|
           line_item_promotions.push(
             {
-              promo_name(adjustment) => {
+              promo_code(adjustment) => {
                 discount_amount: promo_amount(adjustment),
                 discount_display_name: promo_name(adjustment),
               }
@@ -92,6 +92,10 @@ module SolidusAffirm
 
     def promo_amount(adjustment)
       (adjustment.amount.to_money.cents) * -1
+    end
+
+    def promo_code(adjustment)
+      adjustment.promotion_code.value
     end
 
     def order_id
